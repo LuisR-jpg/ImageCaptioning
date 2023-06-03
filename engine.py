@@ -15,11 +15,9 @@ def train_one_epoch(model, criterion, data_loader,
 
     epoch_loss = 0.0
     total = len(data_loader)
-    i = 0
+
     with tqdm.tqdm(total=total) as pbar:
-        print(i)
         for images, masks, caps, cap_masks in data_loader:
-            print(i := i + 1)
             samples = utils.NestedTensor(images, masks).to(device)
             caps = caps.long()
             caps = caps.to(device)

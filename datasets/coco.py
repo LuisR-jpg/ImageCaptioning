@@ -61,13 +61,13 @@ class CocoCaption(Dataset):
         self.annot1 = [(self._process(val['filename']), val['caption'][1])
                       for val in ann] ###
         self.annot.extend(self.annot1)###
+        self.tokenizer = BertTokenizer.from_pretrained(
+            "sagorsarker/bangla-bert-base", do_lower=True)
         if mode == 'validation':
             self.annot = self.annot[-1830:]
         if mode == 'training':
             self.annot = self.annot
 
-        self.tokenizer = BertTokenizer.from_pretrained(
-            "sagorsarker/bangla-bert-base", do_lower=True)
         self.max_length = max_length + 1
         
     def _process(self, image_id):
@@ -100,9 +100,9 @@ class CLEFCaption(Dataset):
         self.root = root
         self.transform = transform
         self.annot = [(filename + '.jpg', caption) for filename, caption in zip(ann['ID'].values, ann['caption'])]
-        self.tokenizer = BertTokenizer.from_pretrained(
-            "sagorsarker/bangla-bert-base", do_lower=True)
+        self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_lower=True)
         self.max_length = max_length + 1
+        #self.annot = self.annot[: len(self.annot) // 100] #TODO delete this
         
     def _process(self, image_id):
         val = str(image_id)

@@ -68,6 +68,8 @@ def main(config):
     train_file = open("losses/training_loss.txt","a")
     val_file= open("losses/val_loss.txt",'a')
 
+    start_time = int(time.time())
+
     for epoch in range(config.start_epoch, config.epochs):
         print(f"Epoch: {epoch}")
         epoch_loss = train_one_epoch(
@@ -81,7 +83,7 @@ def main(config):
             'optimizer': optimizer.state_dict(),
             'lr_scheduler': lr_scheduler.state_dict(),
             'epoch': epoch,
-        }, config.checkpoint)
+        }, f'{start_time}-{epoch}-{config.backbone}-{config.checkpoint}')
 
         validation_loss = evaluate(model, criterion, data_loader_val, device)
         print(f"Validation Loss: {validation_loss}")

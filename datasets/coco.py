@@ -1,8 +1,9 @@
 from torch.utils.data import Dataset
 import torchvision.transforms.functional as TF
 import torchvision as tv
+import torch
 
-
+import pandas as pd
 from PIL import Image
 import numpy as np
 import random
@@ -66,8 +67,7 @@ class CocoCaption(Dataset):
         if mode == 'training':
             self.annot = self.annot
 
-        self.tokenizer = BertTokenizer.from_pretrained(
-            "sagorsarker/bangla-bert-base", do_lower=True)
+        self.tokenizer = BertTokenizer.from_pretrained("sagorsarker/bangla-bert-base", do_lower=True) #TODO
         self.max_length = max_length + 1
         
     def _process(self, image_id):
@@ -93,22 +93,56 @@ class CocoCaption(Dataset):
             1 - np.array(caption_encoded['attention_mask'])).astype(bool)
 
         return image.tensors.squeeze(0), image.mask.squeeze(0), caption, cap_mask
+    
+class CLEFCaption(Dataset):
+    def __init__(self, root, ann, max_length, limit, transform=train_transform, mode='training'):
+        super().__init__()
+        self.root = root
+        self.transform = transform
+        self.annot = [(filename + '.jpg', caption) for filename, caption in zip(ann['ID'].values, ann['caption'])]
+        self.transform = transform
+
+        self.tokenizer = BertTokenizer.from_pretrained(
+            "sagorsarker/bangla-bert-base", do_lower=True)
+        self.max_length = max_length + 1
+        
+    def _process(self, image_id):
+        val = str(image_id)
+        return val
+    
+    def __len__(self):
+        return len(self.annot)
+    
+    def __getitem__(self, idx):
+        image_id, caption = self.annot[idx]
+        image = Image.open(os.path.join(self.root, image_id))
+
+        if self.transform:
+            image = self.transform(image)
+        print('hellothere', image.shape)
+        image = nested_tensor_from_tensor_list(image.unsqueeze(0))
+
+        caption_encoded = self.tokenizer.encode_plus(
+            caption, max_length=self.max_length, padding=True, return_attention_mask=True, return_token_type_ids=False, truncation=True)
+
+        caption = np.array(caption_encoded['input_ids'])
+        cap_mask = (1 - np.array(caption_encoded['attention_mask'])).astype(bool)
+
+        a, b, c, d = image.tensors.squeeze(0), image.mask.squeeze(0), caption, cap_mask
+        print('\tbye there', type(a), type(b), type(c), type(d))
+        return a, b, c, d
 
 def build_dataset(config, mode='training'):
     if mode == 'training':
-        train_dir = os.path.join(config.dir, 'training')
-        train_file = os.path.join(
-            config.dir, 'annotations', 'captions.json')
-        data = CocoCaption(train_dir, read_json(
-            train_file), max_length=config.max_position_embeddings, limit=config.limit, transform=train_transform, mode='training')
+        train_dir = os.path.join(config.dir, 'ImageCLEFmedical_Caption_2023_train_images', 'train')
+        train_file = os.path.join(config.dir, 'train_labels.csv')
+        data = CLEFCaption(train_dir, pd.read_csv(train_file, sep = '\t'), max_length=config.max_position_embeddings, limit=config.limit, transform=train_transform, mode='training')
         return data
 
     elif mode == 'validation':
-        val_dir = os.path.join(config.dir, 'validation')
-        val_file = os.path.join(
-            config.dir, 'annotations', 'captions.json')
-        data = CocoCaption(val_dir, read_json(
-            val_file), max_length=config.max_position_embeddings, limit=config.limit, transform=val_transform, mode='validation')
+        val_dir = os.path.join(config.dir, 'ImageCLEFmedical_Caption_2023_valid_images', 'valid')
+        val_file = os.path.join(config.dir, 'valid_labels.csv')
+        data = CLEFCaption(val_dir, pd.read_csv(val_file, sep = '\t'), max_length=config.max_position_embeddings, limit=config.limit, transform=val_transform, mode='validation')
         return data
 
     else:

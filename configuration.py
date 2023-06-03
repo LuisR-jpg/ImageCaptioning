@@ -21,7 +21,7 @@ class Config(object):
         # Basic
         self.device = 'cuda' #'cpu' #
         self.seed = 42
-        self.batch_size = 16 #32
+        self.batch_size = 2 #32
         self.num_workers = 8
         self.checkpoint = 'checkpoint.pth'
         self.clip_max_norm = 0.1
@@ -42,6 +42,8 @@ class Config(object):
 
         # Dataset
         #self.dir = 'C:/Users/soura/Documents/Python Scripts/image captioning/image&caption'        #'../coco'
-        self.dir ='image&caption'
+        #self.dir ='image&caption'
         #self.dir = Documents/Python Scripts/image captioning/image&caption'
+        #self.dir = 'C:/Users/lalor/Downloads/Deep Learning/COCO'
+        self.dir = 'C:/Users/lalor/Downloads/Deep Learning/ImageCLEF'
         self.limit = -1

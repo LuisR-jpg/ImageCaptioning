@@ -102,6 +102,8 @@ class CLEFCaption(Dataset):
         self.annot = [(filename + '.jpg', caption) for filename, caption in zip(ann['ID'].values, ann['caption'])]
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_lower=True)
         self.max_length = max_length + 1
+        if mode == 'validation': self.annot = self.annot[: len(self.annot) // 2]
+        if mode == 'test': self.annot = self.annot[len(self.annot) // 2:]
         #self.annot = self.annot[: len(self.annot) // 100] #TODO delete this
         
     def _process(self, image_id):

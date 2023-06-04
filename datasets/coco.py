@@ -136,11 +136,10 @@ def build_dataset(config, mode='training'):
         train_file = os.path.join(config.dir, 'train_labels.csv')
         data = CLEFCaption(train_dir, pd.read_csv(train_file, sep = '\t'), max_length=config.max_position_embeddings, limit=config.limit, transform=train_transform, mode='training')
         return data
-    elif mode == 'validation':
+    elif mode in ['validation', 'test']:
         val_dir = os.path.join(config.dir, 'ImageCLEFmedical_Caption_2023_valid_images', 'valid')
         val_file = os.path.join(config.dir, 'valid_labels.csv')
-        data = CLEFCaption(val_dir, pd.read_csv(val_file, sep = '\t'), max_length=config.max_position_embeddings, limit=config.limit, transform=val_transform, mode='validation')
+        data = CLEFCaption(val_dir, pd.read_csv(val_file, sep = '\t'), max_length=config.max_position_embeddings, limit=config.limit, transform=val_transform, mode=mode)
         return data
-
     else:
         raise NotImplementedError(f"{mode} not supported")
